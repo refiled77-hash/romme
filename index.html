@@ -55,7 +55,7 @@
             <div class="flex items-center gap-3">
                 <div id="statusBadge" class="hidden items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Realtime Sync Aktif</span>
+                    <span>Terhubung Supabase</span>
                 </div>
                 <button onclick="toggleConfigModal()" class="px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-2 transition">
                     <i data-lucide="settings" class="w-4 h-4"></i>
@@ -89,12 +89,17 @@
 
             <!-- Left Side: Live Screen Mirror View (Col 7) -->
             <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-4 gap-3">
                     <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <div id="mirrorPulse" class="w-3 h-3 rounded-full bg-slate-600"></div>
                         <h2 class="text-lg font-bold text-white">Live Screen View</h2>
                     </div>
-                    <span id="mirrorUpdateTime" class="text-xs font-mono text-slate-400">Sync: -</span>
+
+                    <!-- Remote ON/OFF Toggle Button -->
+                    <button id="toggleMirrorBtn" onclick="toggleRemoteMirroring()" class="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 transition">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        <span id="toggleMirrorText">Mulai Stream Layar (ON)</span>
+                    </button>
                 </div>
 
                 <!-- Phone Frame Display -->
@@ -103,11 +108,11 @@
                         <!-- Camera Notch -->
                         <div class="absolute top-2 w-20 h-4 bg-slate-800 rounded-full z-20"></div>
 
-                        <!-- Image Placeholder / Live Screen Stream -->
+                        <!-- Image Placeholder / Off State -->
                         <div id="noScreenPlaceholder" class="p-6 text-center text-slate-500 space-y-3">
-                            <i data-lucide="smartphone" class="w-16 h-16 mx-auto text-slate-700 animate-pulse"></i>
-                            <p class="text-xs">Menunggu tampilan layar dari HP...</p>
-                            <p class="text-[11px] text-slate-600">Buka aplikasi Android dan aktifkan layanan aksesibilitas.</p>
+                            <i data-lucide="video-off" class="w-14 h-14 mx-auto text-slate-700"></i>
+                            <p class="text-xs font-semibold text-slate-400">Stream Layar Sedang Mati</p>
+                            <p class="text-[11px] text-slate-600">Tekan tombol <b>"Mulai Stream Layar (ON)"</b> di atas untuk menyalakan mirroring layar dari jarak jauh.</p>
                         </div>
 
                         <img id="screenImage" src="" alt="Live HP Screen" class="hidden w-full h-full object-contain z-10 bg-black">
@@ -115,9 +120,7 @@
                 </div>
 
                 <div class="flex items-center justify-between text-xs text-slate-400 pt-2">
-                    <span class="flex items-center gap-1.5">
-                        <i data-lucide="eye" class="w-4 h-4 text-blue-400"></i> Mode Tampilan Layar (Read-Only)
-                    </span>
+                    <span id="mirrorUpdateTime" class="font-mono text-slate-500">Sync: -</span>
                     <button onclick="zoomScreen()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 flex items-center gap-1">
                         <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Perbesar
                     </button>
@@ -199,6 +202,8 @@
 
         let supabaseClient = null;
         let devicesData = {};
+        let activeDeviceId = null;
+        let isMirroringOn = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -280,6 +285,52 @@
                 .subscribe();
         }
 
+        async function toggleRemoteMirroring() {
+            if (!supabaseClient || !activeDeviceId) {
+                alert('Belum ada perangkat HP yang terhubung!');
+                return;
+            }
+
+            const newState = !isMirroringOn;
+            const btn = document.getElementById('toggleMirrorBtn');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            const { error } = await supabaseClient
+                .from('devices')
+                .update({ is_mirroring_enabled: newState })
+                .eq('id', activeDeviceId);
+
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+
+            if (error) {
+                alert('Gagal mengirim perintah mirroring: ' + error.message);
+            } else {
+                isMirroringOn = newState;
+                updateMirrorUIState(newState);
+            }
+        }
+
+        function updateMirrorUIState(enabled) {
+            const btn = document.getElementById('toggleMirrorBtn');
+            const text = document.getElementById('toggleMirrorText');
+            const pulse = document.getElementById('mirrorPulse');
+
+            if (enabled) {
+                btn.className = "w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-semibold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 transition";
+                text.innerText = "Matikan Stream Layar (OFF)";
+                pulse.className = "w-3 h-3 rounded-full bg-emerald-400 animate-pulse";
+            } else {
+                btn.className = "w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 transition";
+                text.innerText = "Mulai Stream Layar (ON)";
+                pulse.className = "w-3 h-3 rounded-full bg-slate-600";
+
+                document.getElementById('screenImage').classList.add('hidden');
+                document.getElementById('noScreenPlaceholder').classList.remove('hidden');
+            }
+        }
+
         function renderDevices() {
             const grid = document.getElementById('devicesGrid');
             const devices = Object.values(devicesData);
@@ -297,16 +348,20 @@
                 return;
             }
 
-            // Update live screen preview from active/latest device
+            // Target active device
             const activeDevice = devices[0];
-            if (activeDevice && activeDevice.screen_image) {
+            activeDeviceId = activeDevice.id;
+            isMirroringOn = !!activeDevice.is_mirroring_enabled;
+            updateMirrorUIState(isMirroringOn);
+
+            if (isMirroringOn && activeDevice.screen_image) {
                 const screenImg = document.getElementById('screenImage');
                 const placeholder = document.getElementById('noScreenPlaceholder');
                 screenImg.src = activeDevice.screen_image;
                 screenImg.classList.remove('hidden');
                 placeholder.classList.add('hidden');
 
-                document.getElementById('mirrorUpdateTime').innerText = `Sync: ${formatDate(activeDevice.last_updated)}`;
+                document.getElementById('mirrorUpdateTime').innerText = `Sync Layar: ${formatDate(activeDevice.last_updated)}`;
             }
 
             grid.innerHTML = devices.map(device => {
