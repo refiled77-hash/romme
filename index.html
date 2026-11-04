@@ -411,17 +411,25 @@
 
             updateStreamUIState(isStreamActive);
 
-            if (isStreamActive && imageSrc) {
-                const streamImg = document.getElementById('liveStreamImage');
-                const placeholder = document.getElementById('noStreamPlaceholder');
-                const loading = document.getElementById('loadingPlaceholder');
+            const streamImg = document.getElementById('liveStreamImage');
+            const placeholder = document.getElementById('noStreamPlaceholder');
+            const loading = document.getElementById('loadingPlaceholder');
 
+            if (isStreamActive && imageSrc) {
                 streamImg.src = imageSrc;
                 streamImg.classList.remove('hidden');
                 placeholder.classList.add('hidden');
                 loading.classList.add('hidden');
 
                 document.getElementById('streamUpdateTime').innerText = `Sync: ${formatDate(activeDevice.last_updated)}`;
+            } else if (isStreamActive) {
+                streamImg.classList.add('hidden');
+                placeholder.classList.add('hidden');
+                loading.classList.remove('hidden');
+            } else {
+                streamImg.classList.add('hidden');
+                loading.classList.add('hidden');
+                placeholder.classList.remove('hidden');
             }
 
             grid.innerHTML = devices.map(device => {
