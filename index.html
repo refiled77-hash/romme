@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device Remote Monitor Dashboard</title>
+    <title>Device Remote Monitor & Live Screen</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -27,6 +27,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .phone-frame {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            aspect-ratio: 9/19.5;
+        }
+    </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
 
@@ -35,22 +41,25 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30">
-                    <i data-lucide="smartphone" class="w-6 h-6"></i>
+                    <i data-lucide="cast" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold text-white tracking-wide">Device Remote Monitor</h1>
-                    <p class="text-xs text-slate-400">Pantau HP Android Jarak Jauh Realtime</p>
+                    <h1 class="text-lg font-bold text-white tracking-wide flex items-center gap-2">
+                        Device Screen Mirroring
+                        <span class="text-[10px] font-normal px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">Lihat Layar (Read-Only)</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Pantau tampilan layar HP Android secara realtime</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-3">
                 <div id="statusBadge" class="hidden items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Terhubung ke Supabase</span>
+                    <span>Realtime Sync Aktif</span>
                 </div>
                 <button onclick="toggleConfigModal()" class="px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-2 transition">
                     <i data-lucide="settings" class="w-4 h-4"></i>
-                    <span>Pengaturan Supabase</span>
+                    <span>Pengaturan</span>
                 </button>
             </div>
         </div>
@@ -67,7 +76,7 @@
                 </div>
                 <div>
                     <h3 class="text-base font-semibold text-amber-200">Koneksi Supabase Belum Dikonfigurasi</h3>
-                    <p class="text-sm text-amber-300/80 mt-1">Masukkan Supabase URL dan Anon Key untuk mulai memantau HP Anda secara realtime.</p>
+                    <p class="text-sm text-amber-300/80 mt-1">Masukkan Supabase URL dan Anon Key untuk mulai memantau layar HP secara realtime.</p>
                 </div>
             </div>
             <button onclick="toggleConfigModal()" class="px-4 py-2 bg-amber-500 text-slate-950 hover:bg-amber-400 font-semibold text-sm rounded-xl transition shadow-lg shrink-0">
@@ -75,55 +84,76 @@
             </button>
         </div>
 
-        <!-- Devices Section -->
-        <section>
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i data-lucide="cpu" class="w-5 h-5 text-blue-400"></i>
-                    Daftar Perangkat Peribadi
-                </h2>
-                <span id="deviceCount" class="text-xs font-medium text-slate-400 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">0 Perangkat</span>
-            </div>
+        <!-- Layout Grid: Left (Screen Mirroring) & Right (Status Info) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            <!-- Device Cards Grid -->
-            <div id="devicesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Device cards will be rendered dynamically here -->
-            </div>
-        </section>
+            <!-- Left Side: Live Screen Mirror View (Col 7) -->
+            <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <h2 class="text-lg font-bold text-white">Live Screen View</h2>
+                    </div>
+                    <span id="mirrorUpdateTime" class="text-xs font-mono text-slate-400">Sync: -</span>
+                </div>
 
-        <!-- Activity Logs Stream Section -->
-        <section>
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i data-lucide="activity" class="w-5 h-5 text-purple-400"></i>
-                    Log Aktivitas Realtime
-                </h2>
-                <button onclick="clearLogsUI()" class="text-xs text-slate-400 hover:text-slate-200 transition">Bersihkan Tampilan Log</button>
-            </div>
+                <!-- Phone Frame Display -->
+                <div class="flex justify-center py-4 bg-slate-950/80 rounded-2xl border border-slate-800/80 relative overflow-hidden min-h-[520px]">
+                    <div id="phoneScreenContainer" class="phone-frame w-full max-w-[320px] bg-slate-900 rounded-[36px] border-[10px] border-slate-800 relative overflow-hidden flex flex-col justify-center items-center shadow-2xl">
+                        <!-- Camera Notch -->
+                        <div class="absolute top-2 w-20 h-4 bg-slate-800 rounded-full z-20"></div>
 
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-300">
-                        <thead class="bg-slate-950/60 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                            <tr>
-                                <th class="py-3.5 px-4">Waktu</th>
-                                <th class="py-3.5 px-4">Device ID</th>
-                                <th class="py-3.5 px-4">Event</th>
-                                <th class="py-3.5 px-4">Aplikasi</th>
-                                <th class="py-3.5 px-4">Detail</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logsTableBody" class="divide-y divide-slate-800/60 font-mono text-xs">
-                            <tr>
-                                <td colspan="5" class="py-8 text-center text-slate-500 font-sans">Belum ada log aktivitas masuk.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                        <!-- Image Placeholder / Live Screen Stream -->
+                        <div id="noScreenPlaceholder" class="p-6 text-center text-slate-500 space-y-3">
+                            <i data-lucide="smartphone" class="w-16 h-16 mx-auto text-slate-700 animate-pulse"></i>
+                            <p class="text-xs">Menunggu tampilan layar dari HP...</p>
+                            <p class="text-[11px] text-slate-600">Buka aplikasi Android dan aktifkan layanan aksesibilitas.</p>
+                        </div>
+
+                        <img id="screenImage" src="" alt="Live HP Screen" class="hidden w-full h-full object-contain z-10 bg-black">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-400 pt-2">
+                    <span class="flex items-center gap-1.5">
+                        <i data-lucide="eye" class="w-4 h-4 text-blue-400"></i> Mode Tampilan Layar (Read-Only)
+                    </span>
+                    <button onclick="zoomScreen()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 flex items-center gap-1">
+                        <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Perbesar
+                    </button>
                 </div>
             </div>
-        </section>
+
+            <!-- Right Side: Device Status Cards (Col 5) -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i data-lucide="cpu" class="w-5 h-5 text-blue-400"></i>
+                        Informasi Perangkat
+                    </h2>
+                    <span id="deviceCount" class="text-xs font-medium text-slate-400 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">0 Device</span>
+                </div>
+
+                <!-- Devices List -->
+                <div id="devicesGrid" class="space-y-4">
+                    <!-- Device status details rendered here -->
+                </div>
+            </div>
+
+        </div>
 
     </main>
+
+    <!-- Zoom Screen Modal -->
+    <div id="zoomModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="relative max-w-lg w-full flex flex-col items-center">
+            <button onclick="zoomScreen()" class="absolute -top-10 right-0 text-slate-400 hover:text-white flex items-center gap-1 text-sm bg-slate-800 px-3 py-1 rounded-lg border border-slate-700">
+                <i data-lucide="x" class="w-4 h-4"></i> Tutup
+            </button>
+            <img id="zoomedImage" src="" alt="Zoomed Screen" class="rounded-2xl border-4 border-slate-800 shadow-2xl max-h-[85vh] object-contain">
+        </div>
+    </div>
 
     <!-- Configuration Modal -->
     <div id="configModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -140,12 +170,12 @@
 
             <form onsubmit="saveConfig(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">SUPABASE URL</label>
+                    <label for="inputUrl" class="block text-xs font-semibold text-slate-300 mb-1">SUPABASE URL</label>
                     <input type="url" id="inputUrl" placeholder="https://xyz.supabase.co" required
                         class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">SUPABASE ANON KEY</label>
+                    <label for="inputKey" class="block text-xs font-semibold text-slate-300 mb-1">SUPABASE ANON KEY</label>
                     <input type="password" id="inputKey" placeholder="eyJhbGciOiJIUzI1..." required
                         class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
                 </div>
@@ -164,6 +194,9 @@
 
     <!-- Application Script -->
     <script>
+        const DEFAULT_SUPABASE_URL = "https://hwakyafxzxpvypghkmsk.supabase.co";
+        const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3YWt5YWZ4enhwdnlwZ2hrbXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4MDEyNzksImV4cCI6MjEwOTM3NzI3OX0.BNC-NdrpHIDRRseNG-K2KYpYT6fX0DUwqlLMbPCO8cE";
+
         let supabaseClient = null;
         let devicesData = {};
 
@@ -177,8 +210,15 @@
             modal.classList.toggle('hidden');
         }
 
-        const DEFAULT_SUPABASE_URL = "https://hwakyafxzxpvypghkmsk.supabase.co";
-        const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3YWt5YWZ4enhwdnlwZ2hrbXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4MDEyNzksImV4cCI6MjEwOTM3NzI3OX0.BNC-NdrpHIDRRseNG-K2KYpYT6fX0DUwqlLMbPCO8cE";
+        function zoomScreen() {
+            const modal = document.getElementById('zoomModal');
+            const img = document.getElementById('screenImage');
+            const zoomedImg = document.getElementById('zoomedImage');
+            if (img.src && !img.classList.contains('hidden')) {
+                zoomedImg.src = img.src;
+                modal.classList.toggle('hidden');
+            }
+        }
 
         function loadConfig() {
             const url = localStorage.getItem('supabase_url') || DEFAULT_SUPABASE_URL;
@@ -209,7 +249,6 @@
                 document.getElementById('statusBadge').classList.add('flex');
 
                 fetchDevices();
-                fetchLogs();
                 subscribeRealtime();
             } catch (err) {
                 alert('Gagal menghubungkan ke Supabase: ' + err.message);
@@ -227,20 +266,9 @@
             renderDevices();
         }
 
-        async function fetchLogs() {
-            if (!supabaseClient) return;
-            const { data, error } = await supabaseClient.from('device_logs').select('*').order('created_at', { ascending: false }).limit(20);
-            if (error) {
-                console.error('Error fetching logs:', error);
-                return;
-            }
-            renderLogs(data);
-        }
-
         function subscribeRealtime() {
             if (!supabaseClient) return;
 
-            // Subscribe to devices table updates
             supabaseClient
                 .channel('realtime_devices')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'devices' }, payload => {
@@ -250,33 +278,35 @@
                     }
                 })
                 .subscribe();
-
-            // Subscribe to device_logs table inserts
-            supabaseClient
-                .channel('realtime_logs')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'device_logs' }, payload => {
-                    if (payload.new) {
-                        appendLogUI(payload.new);
-                    }
-                })
-                .subscribe();
         }
 
         function renderDevices() {
             const grid = document.getElementById('devicesGrid');
             const devices = Object.values(devicesData);
-            document.getElementById('deviceCount').innerText = `${devices.length} Perangkat`;
+            document.getElementById('deviceCount').innerText = `${devices.length} Device`;
 
             if (devices.length === 0) {
                 grid.innerHTML = `
-                    <div class="col-span-full py-12 text-center bg-slate-900/50 border border-slate-800 rounded-2xl">
+                    <div class="py-12 text-center bg-slate-900 border border-slate-800 rounded-2xl">
                         <i data-lucide="smartphone-nfc" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
-                        <p class="text-slate-400 font-medium">Belum ada HP yang terhubung ke Supabase.</p>
-                        <p class="text-xs text-slate-500 mt-1">Buka aplikasi Android di HP Anda dan lakukan "Tes Sync".</p>
+                        <p class="text-slate-400 font-medium text-sm">Belum ada HP terhubung ke Supabase.</p>
+                        <p class="text-xs text-slate-500 mt-1">Buka aplikasi di HP dan lakukan Tes Sync.</p>
                     </div>
                 `;
                 lucide.createIcons();
                 return;
+            }
+
+            // Update live screen preview from active/latest device
+            const activeDevice = devices[0];
+            if (activeDevice && activeDevice.screen_image) {
+                const screenImg = document.getElementById('screenImage');
+                const placeholder = document.getElementById('noScreenPlaceholder');
+                screenImg.src = activeDevice.screen_image;
+                screenImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+
+                document.getElementById('mirrorUpdateTime').innerText = `Sync: ${formatDate(activeDevice.last_updated)}`;
             }
 
             grid.innerHTML = devices.map(device => {
@@ -285,10 +315,8 @@
 
                 return `
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition shadow-lg relative overflow-hidden">
-                        <!-- Status indicator bar -->
                         <div class="absolute top-0 left-0 right-0 h-1 ${isOnline ? 'bg-emerald-500' : 'bg-slate-700'}"></div>
 
-                        <!-- Top row -->
                         <div class="flex items-start justify-between mb-4">
                             <div>
                                 <div class="flex items-center gap-2">
@@ -297,14 +325,11 @@
                                         ${isOnline ? 'ONLINE' : 'OFFLINE'}
                                     </span>
                                 </div>
-                                <p class="text-xs text-slate-400 font-mono mt-0.5">${escapeHtml(device.model || 'Model Unknown')} • ${escapeHtml(device.android_version || '')}</p>
+                                <p class="text-xs text-slate-400 font-mono mt-0.5">${escapeHtml(device.model || 'Model Unknown')}</p>
                             </div>
-                            <span class="text-xs font-mono text-slate-500">ID: ${escapeHtml(device.id)}</span>
                         </div>
 
-                        <!-- Info Grid -->
                         <div class="space-y-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80 mb-4">
-                            <!-- Battery Row -->
                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-slate-400 flex items-center gap-1.5">
                                     <i data-lucide="battery" class="w-4 h-4 text-emerald-400"></i> Baterai
@@ -315,7 +340,6 @@
                                 </span>
                             </div>
 
-                            <!-- Network Row -->
                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-slate-400 flex items-center gap-1.5">
                                     <i data-lucide="wifi" class="w-4 h-4 text-blue-400"></i> Jaringan
@@ -323,7 +347,6 @@
                                 <span class="font-semibold text-slate-200">${escapeHtml(device.network_type || 'UNKNOWN')}</span>
                             </div>
 
-                            <!-- Active App Row -->
                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-slate-400 flex items-center gap-1.5">
                                     <i data-lucide="app-window" class="w-4 h-4 text-purple-400"></i> Aplikasi Aktif
@@ -332,7 +355,6 @@
                             </div>
                         </div>
 
-                        <!-- Last Text Captured snippet if available -->
                         ${device.last_text_captured ? `
                             <div class="mb-3 text-[11px] bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-slate-400 font-mono line-clamp-2">
                                 <span class="text-slate-500 font-sans block text-[10px] uppercase tracking-wider mb-0.5">Teks Layar Terakhir:</span>
@@ -340,9 +362,8 @@
                             </div>
                         ` : ''}
 
-                        <!-- Footer -->
                         <div class="flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-800/60 pt-3">
-                            <span>Last Update:</span>
+                            <span>Update Terakhir:</span>
                             <span class="font-mono text-slate-400">${formatDate(device.last_updated)}</span>
                         </div>
                     </div>
@@ -352,61 +373,11 @@
             lucide.createIcons();
         }
 
-        function renderLogs(logs) {
-            const tbody = document.getElementById('logsTableBody');
-            if (logs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-slate-500 font-sans">Belum ada log aktivitas masuk.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = logs.map(log => `
-                <tr class="hover:bg-slate-800/40 transition">
-                    <td class="py-3 px-4 text-slate-400">${formatDate(log.created_at)}</td>
-                    <td class="py-3 px-4 text-slate-300 font-bold">${escapeHtml(log.device_id || '')}</td>
-                    <td class="py-3 px-4">
-                        <span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                            ${escapeHtml(log.event_type || 'EVENT')}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4 text-slate-200">${escapeHtml(log.app_name || log.package_name || '-')}</td>
-                    <td class="py-3 px-4 text-slate-400 font-sans truncate max-w-xs">${escapeHtml(log.detail || '-')}</td>
-                </tr>
-            `).join('');
-        }
-
-        function appendLogUI(log) {
-            const tbody = document.getElementById('logsTableBody');
-            if (tbody.querySelector('td[colspan]')) {
-                tbody.innerHTML = '';
-            }
-
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-800/40 transition animate-pulse';
-            tr.innerHTML = `
-                <td class="py-3 px-4 text-slate-400">${formatDate(log.created_at)}</td>
-                <td class="py-3 px-4 text-slate-300 font-bold">${escapeHtml(log.device_id || '')}</td>
-                <td class="py-3 px-4">
-                    <span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                        ${escapeHtml(log.event_type || 'EVENT')}
-                    </span>
-                </td>
-                <td class="py-3 px-4 text-slate-200">${escapeHtml(log.app_name || log.package_name || '-')}</td>
-                <td class="py-3 px-4 text-slate-400 font-sans truncate max-w-xs">${escapeHtml(log.detail || '-')}</td>
-            `;
-
-            tbody.insertBefore(tr, tbody.firstChild);
-            setTimeout(() => tr.classList.remove('animate-pulse'), 2000);
-        }
-
-        function clearLogsUI() {
-            document.getElementById('logsTableBody').innerHTML = '<tr><td colspan="5" class="py-8 text-center text-slate-500 font-sans">Tampilan log dibersihkan.</td></tr>';
-        }
-
         function checkIsOnline(isoDateStr) {
             if (!isoDateStr) return false;
             const last = new Date(isoDateStr).getTime();
             const now = new Date().getTime();
-            return (now - last) < (3 * 60 * 1000); // Online if updated within last 3 mins
+            return (now - last) < (3 * 60 * 1000);
         }
 
         function formatDate(dateStr) {
