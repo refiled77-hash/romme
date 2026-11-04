@@ -1,0 +1,9 @@
+{
+  "name": "device-remote-monitor-web",
+  "version": "1.0.0",
+  "description": "Web Dashboard Remote Device Monitor",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
