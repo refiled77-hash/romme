@@ -117,7 +117,7 @@
                 <div class="flex justify-center py-6 bg-dark-900/90 rounded-2xl border border-slate-800/80 relative overflow-hidden min-h-[540px]">
                     <div class="view-frame w-full max-w-[340px] bg-dark-900 rounded-3xl border-[6px] border-slate-800 relative overflow-hidden flex flex-col justify-center items-center shadow-2xl">
 
-                        <!-- Placeholder / Off State -->
+                        <!-- Placeholder / Dynamic Status State -->
                         <div id="noStreamPlaceholder" class="p-6 text-center text-slate-500 space-y-3">
                             <div class="w-16 h-16 rounded-2xl bg-slate-800/50 flex items-center justify-center mx-auto text-slate-600 border border-slate-700/50">
                                 <i data-lucide="video-off" class="w-7 h-7"></i>
@@ -414,9 +414,26 @@
                 placeholder.classList.add('hidden');
 
                 document.getElementById('streamUpdateTime').innerText = `Sync: ${formatDate(activeDevice.last_updated)}`;
+            } else if (isStreamActive) {
+                // Stream is ON, but waiting for image -> show loading spinner
+                streamImg.classList.add('hidden');
+                placeholder.innerHTML = `
+                    <div class="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                    <p class="text-xs font-bold text-slate-200">Menghubungkan ke HP...</p>
+                    <p class="text-[10px] text-slate-500">Menunggu tangkapan layar pertama.</p>
+                `;
+                placeholder.classList.remove('hidden');
             } else {
                 streamImg.classList.add('hidden');
+                placeholder.innerHTML = `
+                    <div class="w-16 h-16 rounded-2xl bg-slate-800/50 flex items-center justify-center mx-auto text-slate-600 border border-slate-700/50">
+                        <i data-lucide="video-off" class="w-7 h-7"></i>
+                    </div>
+                    <p class="text-xs font-bold text-slate-400">Stream Sedang Mati</p>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Tekan tombol <b>"Mulai Stream (ON)"</b> untuk menyiarkan tayangan live.</p>
+                `;
                 placeholder.classList.remove('hidden');
+                lucide.createIcons();
             }
 
             grid.innerHTML = devices.map(device => {
@@ -429,6 +446,7 @@
 
                         <div class="flex items-start justify-between mb-4">
                             <div>
+                                in_progress_skills.json
                                 <div class="flex items-center gap-2">
                                     <h3 class="font-bold text-sm text-white">${escapeHtml(device.device_name || device.id)}</h3>
                                     <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full ${isOnline ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}">
@@ -446,7 +464,7 @@
                                 </span>
                                 <span class="font-semibold text-slate-200 flex items-center gap-1">
                                     ${batteryPct}
-                                    ${device.is_charging ? '<i data-lucide="zap" class="w-3 h-3 text-amber-400 fill-amber-400 animate-pulse"></i>' : ''}
+                                    ${device.is_charging ? '<i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400 fill-amber-400 animate-pulse"></i>' : ''}
                                 </span>
                             </div>
 
