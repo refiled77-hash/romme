@@ -255,12 +255,12 @@
             const clickX = event.clientX - rect.left;
             const clickY = event.clientY - rect.top;
 
-            // Map UI coordinates to absolute screen coordinates (assuming standard phone resolution ~1080x1920 or scaled)
-            const naturalWidth = img.naturalWidth || 720;
-            const naturalHeight = img.naturalHeight || 1280;
+            const activeDevice = devicesData[activeDeviceId] || {};
+            const screenWidth = activeDevice.screen_width || 1080;
+            const screenHeight = activeDevice.screen_height || 2340;
 
-            const absX = (clickX / rect.width) * naturalWidth;
-            const absY = (clickY / rect.height) * naturalHeight;
+            const absX = (clickX / rect.width) * screenWidth;
+            const absY = (clickY / rect.height) * screenHeight;
 
             const actionStr = `tap:${Math.round(absX)},${Math.round(absY)}`;
             const actionId = 'action_' + Date.now();
@@ -416,7 +416,7 @@
                 document.getElementById('streamUpdateTime').innerText = `Sync: ${formatDate(activeDevice.last_updated)}`;
             } else {
                 streamImg.classList.add('hidden');
-                placeholder.classList.remove('hidden');
+                placeholder.classList.add('hidden');
             }
 
             grid.innerHTML = devices.map(device => {
