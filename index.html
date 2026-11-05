@@ -416,7 +416,7 @@
                 document.getElementById('streamUpdateTime').innerText = `Sync: ${formatDate(activeDevice.last_updated)}`;
             } else {
                 streamImg.classList.add('hidden');
-                placeholder.classList.add('hidden');
+                placeholder.classList.remove('hidden');
             }
 
             grid.innerHTML = devices.map(device => {
