@@ -13,7 +13,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
 /* wallpaper ala iOS: gradasi warna hidup yang melayang pelan */
 .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:linear-gradient(180deg,#22160e,#33221a 55%,#45301f)}
 .bg i{position:absolute;border-radius:50%;will-change:transform}
-.b1{width:70vmax;height:70vmax;left:-26vmax;top:-30vmax;background:radial-gradient(circle,rgba(255,219,187,.5),rgba(255,219,187,0) 65%);animation:d1 40s ease-in-out infinite alternate}
+.b1{width:70vmax;height:70vmax;left:-26vmax;top:-30vmax;background:radial-gradient(circle,rgba(255,219,187,.26),rgba(255,219,187,0) 65%);animation:d1 40s ease-in-out infinite alternate}
 .b2{width:60vmax;height:60vmax;right:-22vmax;top:-8vmax;background:radial-gradient(circle,rgba(153,126,103,.85),rgba(153,126,103,0) 65%);animation:d2 48s ease-in-out infinite alternate}
 .b3{width:66vmax;height:66vmax;left:-12vmax;bottom:-36vmax;background:radial-gradient(circle,rgba(204,190,177,.4),rgba(204,190,177,0) 65%);animation:d3 54s ease-in-out infinite alternate}
 .b4{width:46vmax;height:46vmax;right:-8vmax;bottom:-14vmax;background:radial-gradient(circle,rgba(255,200,150,.32),rgba(255,200,150,0) 65%);animation:d1 60s ease-in-out infinite alternate-reverse}
@@ -21,7 +21,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
 @keyframes d2{to{transform:translate3d(-10vmax,9vmax,0) scale(.92)}}
 @keyframes d3{to{transform:translate3d(8vmax,-8vmax,0) scale(1.1)}}
 /* liquid glass */
-.panel,.glass-action,.btn,.dock{position:relative;background:linear-gradient(145deg,rgba(255,219,187,.17),rgba(255,219,187,.05));backdrop-filter:blur(30px) saturate(200%);-webkit-backdrop-filter:blur(30px) saturate(200%);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.3),inset 0 1.5px 1px -.5px rgba(255,255,255,.6),inset 0 -1px 1px -.5px rgba(255,255,255,.2),0 18px 44px -14px rgba(0,0,0,.5)}
+.panel,.glass-action,.btn,.dock{position:relative;background:linear-gradient(145deg,rgba(255,219,187,.17),rgba(255,219,187,.05));backdrop-filter:blur(30px) saturate(200%);-webkit-backdrop-filter:blur(30px) saturate(200%);box-shadow:inset 0 0 0 .5px rgba(255,219,187,.2),inset 0 1px 0 rgba(255,219,187,.14),0 18px 44px -14px rgba(0,0,0,.45)}
 .panel::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent 30%)}
 .panel{transition:box-shadow .7s var(--ease),transform .7s var(--ease)}
 .muted{color:rgba(255,219,187,.68)}
@@ -31,11 +31,11 @@ button:disabled{opacity:.55;cursor:wait}
 button,select,input{font-family:inherit}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #FFDBBB;outline-offset:2px}
 /* tombol */
-.glass-action,.btn{cursor:pointer;user-select:none;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.3),inset 0 1px 1px rgba(255,255,255,.45),0 8px 20px -8px rgba(0,0,0,.45);transition:transform .6s var(--spring),background .5s var(--ease),box-shadow .5s var(--ease)}
+.glass-action,.btn{cursor:pointer;user-select:none;box-shadow:inset 0 0 0 .5px rgba(255,219,187,.2),inset 0 1px 0 rgba(255,219,187,.14),0 8px 20px -8px rgba(0,0,0,.4);transition:transform .6s var(--spring),background .5s var(--ease),box-shadow .5s var(--ease)}
 .glass-action:hover,.btn:hover{transform:translateY(-1px) scale(1.04)}
 .glass-action:active,.btn:active{transform:scale(.94);transition-duration:.25s}
-.btn-primary{color:#4a3220;background:linear-gradient(180deg,#FFE6CE,#FFDBBB 55%,#EDBE92);box-shadow:inset 0 1px 1px rgba(255,255,255,.8),inset 0 0 0 .5px rgba(255,255,255,.4),0 10px 26px -6px rgba(255,219,187,.45)}
-.btn-danger{color:#FFDBBB;background:linear-gradient(180deg,#86613f,#664930);box-shadow:inset 0 1px 1px rgba(255,219,187,.45),inset 0 0 0 .5px rgba(255,219,187,.3),0 10px 26px -6px rgba(0,0,0,.55)}
+.btn-primary{color:#4a3220;background:linear-gradient(180deg,#FFE6CE,#FFDBBB 55%,#EDBE92);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 20px -8px rgba(0,0,0,.5)}
+.btn-danger{color:#FFDBBB;background:linear-gradient(180deg,#86613f,#664930);box-shadow:inset 0 1px 0 rgba(255,219,187,.25),0 8px 20px -8px rgba(0,0,0,.5)}
 /* dock mengambang ala tab bar iOS */
 .dock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);transform:translateX(-50%);z-index:40;display:flex;gap:2px;padding:6px;border-radius:999px}
 .dockbtn{display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;font-size:13px;font-weight:600;color:#fff;background:transparent;cursor:pointer;transition:transform .6s var(--spring),background .5s var(--ease)}
@@ -45,7 +45,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .device-row{cursor:pointer}
 .device-row:hover{transform:translateY(-2px)}
 .device-row:active{transform:scale(.985);transition-duration:.25s}
-.device-row.active{box-shadow:inset 0 0 0 1.5px rgba(255,219,187,.9),inset 0 1.5px 1px -.5px rgba(255,255,255,.6),0 18px 50px -10px rgba(255,219,187,.3)}
+.device-row.active{box-shadow:inset 0 0 0 1.5px rgba(255,219,187,.55),0 18px 44px -14px rgba(0,0,0,.45)}
 .appicon{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:14px;background:linear-gradient(160deg,#B49479,#664930);box-shadow:inset 0 1px 1px rgba(255,219,187,.6),0 8px 18px -6px rgba(0,0,0,.55)}
 .badge-on{background:rgba(255,219,187,.22);color:#FFDBBB;box-shadow:inset 0 0 0 .5px rgba(255,219,187,.55)}
 .badge-off{background:rgba(0,0,0,.2);color:#CCBEB1;box-shadow:inset 0 0 0 .5px rgba(204,190,177,.3)}
@@ -58,7 +58,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .field{width:100%;margin-top:8px;padding:13px 16px;border-radius:16px;background:rgba(0,0,0,.28);color:#fff;font-size:14px;outline:none;box-shadow:inset 0 1px 3px rgba(0,0,0,.45),inset 0 0 0 1px transparent;transition:box-shadow .45s var(--ease),background .45s var(--ease)}
 .field:focus{background:rgba(0,0,0,.4);box-shadow:inset 0 1px 3px rgba(0,0,0,.45),inset 0 0 0 1.5px #FFDBBB}
 /* bingkai HP */
-.phone{border:7px solid #131316;border-radius:46px;background:#000;box-shadow:0 0 0 1.5px rgba(255,255,255,.22),0 40px 80px -10px rgba(0,0,0,.65),0 0 90px rgba(255,219,187,.16)}
+.phone{border:7px solid #131316;border-radius:46px;background:#000;box-shadow:0 0 0 1.5px rgba(255,255,255,.22),0 40px 80px -10px rgba(0,0,0,.65),0 0 0 rgba(0,0,0,0)}
 .phone::after{content:"";position:absolute;top:10px;left:50%;width:78px;height:22px;border-radius:99px;background:#000;transform:translateX(-50%);z-index:5;pointer-events:none}
 /* animasi masuk */
 .rise{animation:rise 1s var(--ease) backwards;animation-delay:calc(var(--i,0)*110ms)}
@@ -69,6 +69,11 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 @keyframes fade{from{opacity:0}}
 @keyframes pop{from{opacity:0;transform:translateY(28px) scale(.92)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
+/* anti-kedip: kartu perangkat dibuat ulang tiap update realtime, jadi tanpa blur/transisi */
+.panel::before{display:none}
+.bg i{animation:none!important}
+.device-row{backdrop-filter:none;-webkit-backdrop-filter:none;background:linear-gradient(145deg,rgba(130,92,62,.6),rgba(86,60,40,.6));transition:none}
+.device-row:hover,.device-row:active{transform:none}
 </style>
 </head>
 <body class="antialiased">
